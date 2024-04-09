@@ -8,6 +8,21 @@ from rest_framework.permissions import IsAuthenticated
 from .models import User
 from .serializers import UserSerializer
 
+""" 
+[signup api]
+    username: char
+    password: char
+    email: char
+    first_name: char
+    last_name: char
+    phone_number: char
+    birth: YY-MM-DD
+    is_senior: 0(unknown)/1(male)/2(female)
+[login api]
+    username: char
+    password: char
+"""
+
 @api_view(['POST'])
 def signup(request):
     serializer = UserSerializer(data=request.data)
