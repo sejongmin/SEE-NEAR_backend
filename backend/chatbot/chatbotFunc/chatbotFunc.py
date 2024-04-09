@@ -1,8 +1,8 @@
 from openai import OpenAI
 
-client = OpenAI(
-    api_key='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',
-)
+# client = OpenAI(
+#     api_key=OPEN_API_KEY,
+# )
 
 def update_list(message, prompt_list):
     prompt_list.append(message)
