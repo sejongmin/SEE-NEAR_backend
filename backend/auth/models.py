@@ -4,10 +4,10 @@ import uuid
 
 class User(AbstractUser):
     is_senior = models.BooleanField(default=False)
-    phone_number = models.CharField("핸드폰번호", max_length=20, null=True)
-    birth = models.DateField("생년월일", null=True)
+    phone_number = models.CharField(max_length=20, null=True)
+    birth = models.DateField(null=True)
     family_id = models.ForeignKey("Family", related_name="family", on_delete=models.CASCADE, db_column="family_id", null=True)
-    role = models.CharField("가족관계", max_length=20, null=True)
+    role = models.CharField(max_length=20, null=True)
 
 GENDER_CHOICES = [
     (0, "Unknown"),
