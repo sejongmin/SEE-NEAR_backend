@@ -19,3 +19,22 @@ def signup(request):
         }
         return Response(data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def login(request):
+    authenticate_user = authenticate(username=request.data['username'], password=request.data['password'])
+
+    if authenticate_user is not None:
+        user = User.objects.get(username=request.data['username'])
+        serializer = UserSerializer(user)
+        response_data = {
+            'user': serializer.data,
+        }
+        token, created_token = Token.objects.get_or_create(user=user)
+        if token:
+            response_data['token'] = token.key
+        elif created_token:
+            response_data['token'] = created_token.key
+
+        return Response(response_data, status=status.HTTP_202_ACCEPTED)
+    return Response({"error": "user not found"}, status=status.HTTP_400_BAD_REQUEST)
