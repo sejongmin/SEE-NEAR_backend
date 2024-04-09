@@ -32,7 +32,7 @@ class FamilySerializer(ModelSerializer):
         model = Family
         fields = ("family_name", "senior_id", "senior_birth", "senior_gender", "senior_diseases", "senior_interests")
 
-    def save(self, user):
+    def create(self, user):
         new_family = Family.objects.create(
             family_name = self.validated_data.get("family_name"),
             senior_id = user,
