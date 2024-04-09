@@ -1,8 +1,9 @@
 from openai import OpenAI
+from django.conf import settings
 
-# client = OpenAI(
-#     api_key=OPEN_API_KEY,
-# )
+client = OpenAI(
+    api_key=settings.OPEN_API_KEY,
+)
 
 def update_list(message, prompt_list):
     prompt_list.append(message)
