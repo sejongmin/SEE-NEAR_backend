@@ -51,13 +51,11 @@ def login(request):
     authenticate_user = authenticate(username=request.data['username'], password=request.data['password'])
     if authenticate_user is not None:
         user = User.objects.get(username=request.data['username'])
-        serializer = UserSerializer(user)
-        data = {'user': serializer.data,}
         token, created_token = Token.objects.get_or_create(user=user)
         if token:
-            data['token'] = token.key
+            data = {"token": token.key}
         elif created_token:
-            data['token'] = created_token.key
+            data = {"token": created_token.key}
         return Response(data, status=status.HTTP_202_ACCEPTED)
     data = {"error": "user not found"}
     return Response(data, status=status.HTTP_404_NOT_FOUND)
@@ -77,9 +75,9 @@ def logout(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def create_family(request):
+    user = request.user
     serializer = FamilySerializer(data=request.data)
     if serializer.is_valid():
-        user = request.user
         serializer.create(user=user)
         data = {
             "family": serializer.data,
