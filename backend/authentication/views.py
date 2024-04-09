@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .models import User
+from .models import User, Family
 from .serializers import UserSerializer, FamilySerializer
 
 """ 
@@ -75,12 +75,13 @@ def logout(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def create_family(request):
-    user = request.user
     serializer = FamilySerializer(data=request.data)
     if serializer.is_valid():
+        user = request.user
         serializer.create(user=user)
+        family = Family.objects.get(senior_id=user.id)
         data = {
-            "family": serializer.data,
+            "family": family.id,
             "role": "senior"
         }
         return Response(data, status=status.HTTP_201_CREATED)

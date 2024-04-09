@@ -53,6 +53,7 @@ CORS_ALLOWED_CREDENTIALS = True
 INSTALLED_APPS = [
     'chatbot',
     'authentication',
+    'events',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
