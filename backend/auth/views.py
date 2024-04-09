@@ -3,6 +3,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from .models import User
 from .serializers import UserSerializer
 
@@ -38,3 +40,10 @@ def login(request):
 
         return Response(response_data, status=status.HTTP_202_ACCEPTED)
     return Response({"error": "user not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    request.user.auth_token.delete()
+    return Response({"message": "logout was successful"})
