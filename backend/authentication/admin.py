@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import User, Family
+from events.models import Event
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
@@ -20,10 +21,20 @@ class UserInLine(admin.TabularInline):
         (None, {"fields": ["username", "role", "first_name", "last_name"]})
     ]
 
+class EventInLine(admin.TabularInline):
+    model = Event
+    extra = 0
+
+    fieldsets = [
+        (None, {"fields": ["title", "location", "datetime"]})
+    ]
+
+
 class FamilyAdmin(admin.ModelAdmin):
     list_display = ["id", "family_name"]
     inlines = [
         UserInLine,
+        EventInLine,
     ]
     fieldsets = [
         (None, {"fields": ("family_name",)}),
