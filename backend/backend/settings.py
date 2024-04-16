@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'chatbot',
     'authentication',
     'events',
+    'conversation',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',

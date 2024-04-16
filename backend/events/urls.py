@@ -1,10 +1,20 @@
 from django.urls import path, register_converter
-from .views import (create_event, get_event)
 from .converters import DateConverter
+from .views import (
+    create_event, 
+    get_events, 
+    EventViewSet
+    )
 
 register_converter(DateConverter, "date")
+event_detail = EventViewSet.as_view({
+    "get": "retrieve",
+    "put": "update",
+    "delete": "destroy"
+})
 
 urlpatterns = [
-    path('create-event/', create_event),
-    path('get-events/<date:date>/', get_event),
+    path('create/', create_event, name="event-create"),
+    path('<date:date>/', get_events, name="event-get"),
+    path("<int:pk>/", event_detail, name="event-detail"),
 ]
