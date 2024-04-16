@@ -1,11 +1,13 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from .models import User, Family
 
-class UserSerializer(ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("username", "email", "password", "first_name", "last_name", "phone_number", "birth", "is_senior")
+        fields = ("id", "username", "email", "first_name", "last_name", "phone_number", "birth", "is_senior")
+        read_only_fields = ("id",)
+        extra_kwargs = {'password': {'write_only': True}}
 
     def save(self, **kwargs):
         new_user = User.objects.create_user(
@@ -27,11 +29,12 @@ class UserSerializer(ModelSerializer):
         user.role = validated_data.get("role")
         user.save()
 
-class FamilySerializer(ModelSerializer):
+class FamilySerializer(serializers.ModelSerializer):
     class Meta:
         model = Family
-        fields = ("family_name", "senior_id", "senior_birth", "senior_gender", "senior_diseases", "senior_interests")
-
+        fields = ("id", "family_name", "senior_id", "senior_birth", "senior_gender", "senior_diseases", "senior_interests")
+        read_only_fields = ("id",)
+        
     def create(self, user):
         new_family = Family.objects.create(
             family_name = self.validated_data.get("family_name"),

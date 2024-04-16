@@ -1,12 +1,12 @@
 from rest_framework.serializers import ModelSerializer
-from rest_framework.fields import CurrentUserDefault
 from .models import Event
 from authentication.models import Family
 
 class EventSerializer(ModelSerializer):
     class Meta:
         model = Event
-        fields = ("title", "location", "datetime")
+        fields = ("id", "title", "location", "datetime")
+        read_only_fields = ("id",)
 
     def create(self, family):
         family = Family.objects.get(id=family)

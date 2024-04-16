@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate
-from rest_framework import status
-from rest_framework.decorators import api_view, authentication_classes, permission_classes, action
+from django.shortcuts import get_object_or_404
+from rest_framework import status, viewsets
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
@@ -9,7 +10,7 @@ from .models import User, Family
 from .serializers import UserSerializer, FamilySerializer
 
 """ 
-[signup api]
+[signup]
     username: char
     password: char
     email: char
@@ -18,10 +19,10 @@ from .serializers import UserSerializer, FamilySerializer
     phone_number: char
     birth: YY-MM-DD
     is_senior: true/false
-[login api]
+[login]
     username: char
     password: char
-[create-family api]
+[create-family]
     family_name: char
     senior_gender: 0(unknown)/1(male)/2(female)
     senior_diseases: char
@@ -29,6 +30,13 @@ from .serializers import UserSerializer, FamilySerializer
 [join-family]
     family_id: uuid(6)
     role: char
+[family_detail]
+    -request url <char:pk>
+    -request method PUT-
+    family_name: char
+    senior_gender: 0(unknown)/1(male)/2(female)
+    senior_diseases: char
+    senior_interests: char
 """
 
 @api_view(['POST'])
@@ -81,7 +89,8 @@ def create_family(request):
         serializer.create(user=user)
         family = Family.objects.get(senior_id=user.id)
         data = {
-            "family": family.id,
+            "id": family.id,
+            "family": serializer.data,
             "role": "senior"
         }
         return Response(data, status=status.HTTP_201_CREATED)
@@ -100,3 +109,13 @@ def join_family(request):
     except Exception as e:
         data = {"error": e}
         return Response(data, status=status.HTTP_404_NOT_FOUND)
+    
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+class FamilyViewSet(viewsets.ModelViewSet):
+    queryset = Family.objects.all()
+    serializer_class = FamilySerializer
+    permission_classes = [IsAuthenticated]
