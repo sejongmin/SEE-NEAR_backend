@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
 from django.http import FileResponse
@@ -7,6 +7,57 @@ from django.conf import settings
 from .chatbotFunc.chatbotFunc import *
 
 import os
+
+@api_view(['GET'])
+def startConversation(request):
+    print("대화 시작")
+    
+    return Response({'message': '대화가 시작되었습니다.'})
+
+@api_view(['GET'])
+def endConversation(request):
+    print("대화 종료")
+    
+    return Response({'message': '대화가 종료되었습니다.'})
+
+@api_view(['GET'])
+def getSummary(request):
+    print("대화 요약")
+    with open('media/text.txt', "r", encoding='utf-8') as f:
+        conversation = f.read()
+    print(conversation)
+    
+    command = ['다음 내용은 혼자 계신 시니어와 말동무 역할인 음성 챗봇간의 일상 생활',
+                '관련 대화 답변 내용이야. 이를 참고해서 혼자 계신 시니어의 일상 활동을',
+                '간략하게 한줄정도로 요약해줘']
+    
+    prompt = create_prompt(conversation, command)
+    print(prompt)
+    response = client.chat.completions.create(
+    model="gpt-4",
+    messages = [
+    {
+        "role": "system",
+        "content": prompt
+    },
+    ],
+    max_tokens=100,
+    temperature=0.8,
+    stop=[' Human:', ' AI:']
+    )
+    print(response)
+    if response.choices:
+        bot_response = response.choices[0].message.content 
+    else:
+        bot_response = "No response from the model."
+    
+    print(f'요약: {bot_response}')
+    summary_path = os.path.join(settings.MEDIA_ROOT, 'summary.txt')
+    with open(summary_path, 'a', encoding='utf-8') as f:
+            f.write(bot_response)
+            
+    return Response({'message': '대화가 요약 완료.'})
+
 
 name = '김숙자'
 sex = 'female'
