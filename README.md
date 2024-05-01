@@ -3,7 +3,7 @@
 - 처음 개발 시작
     1. git pull
     2. git branch (현재 branch 확인)
-    3. git chechout <branch_name> (branch 이동)
+    3. git checkout <branch_name> (branch 이동)
     4-a. git branch <branch_name> (brach 생성) -> git branch checkout <branch_name> (branch 이동)
     4-b. git checkout -b <branch_name> (brach 생성 후 이동)
     - 항상 새로운 branch를 생성 후 작업
