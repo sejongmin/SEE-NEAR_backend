@@ -23,10 +23,10 @@ class UserSerializer(serializers.ModelSerializer):
         new_user.save()
         new_token = Token.objects.create(user=new_user)
 
-    def join(self, user, validated_data):
-        family = Family.objects.get(id=validated_data.get("family_id"))
+    def join(self, user, data):
+        family = Family.objects.get(id=data.get("family_id"))
         user.family_id = family
-        user.role = validated_data.get("role")
+        user.role = data.get("role")
         user.save()
 
 class FamilySerializer(serializers.ModelSerializer):

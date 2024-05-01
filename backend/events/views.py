@@ -23,7 +23,7 @@ def create_event(request):
     serializer = EventSerializer(data=request.data)
     if serializer.is_valid():
         event = serializer.create(request.user.family_id)
-        data = {serializer.data}
+        data = serializer.data
         data["id"] = event.id
         return Response(data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
