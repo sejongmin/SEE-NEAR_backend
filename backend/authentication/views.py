@@ -103,7 +103,7 @@ def create_family(request):
 def join_family(request):
     try:
         serializer = UserSerializer()
-        serializer.join(request.user, request.data)
+        serializer.join(user=request.user, data=request.data)
         data = {"message": "join was successful"}
         return Response(data, status=status.HTTP_200_OK)
     except Exception as e:
