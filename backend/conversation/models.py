@@ -24,10 +24,10 @@ class DayReport(models.Model):
     emotion_rate = models.FloatField(default=0)
     bad_rate = models.FloatField(default=0)
     post_count = models.IntegerField(default=0)
+    emotion_0 = models.IntegerField(default=0)
     emotion_1 = models.IntegerField(default=0)
     emotion_2 = models.IntegerField(default=0)
     emotion_3 = models.IntegerField(default=0)
-    emotion_4 = models.IntegerField(default=0)
     date = models.DateField(default=timezone.now)
     keywords = models.TextField(default="")
 
