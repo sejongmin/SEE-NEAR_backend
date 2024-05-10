@@ -1,4 +1,4 @@
-from django.db.models import F
+from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from .models import Post, DayReport
 from .reportFunc import calculateEmotionRate, calculateBadRate
@@ -32,8 +32,7 @@ class PostSerializer(ModelSerializer):
 class DayReportSerializer(ModelSerializer):
     class Meta:
         model = DayReport
-        fields = '__all__'
-        read_only_fields = ("id",)
+        fields = ("id", "emotion_rate", "date")
 
     def get_or_create(self, family, date):
         report, new_report = DayReport.objects.get_or_create(
@@ -66,3 +65,8 @@ class DayReportSerializer(ModelSerializer):
 
         report.save()
         return report
+    
+class WeekReportSerializer(ModelSerializer):
+    class Meta:
+        model = DayReport
+        fields = ("id", "emotion_rate", "date", "bad_rate", "emotion_0", "emotion_1", "emotion_2", "emotion_3")

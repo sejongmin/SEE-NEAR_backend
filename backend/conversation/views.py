@@ -1,11 +1,12 @@
+import datetime
 from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .models import Post
-from .serializers import PostSerializer, DayReportSerializer
+from .models import Post, DayReport
+from .serializers import PostSerializer, DayReportSerializer, WeekReportSerializer
 
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
@@ -25,7 +26,7 @@ def update_post(request, pk):
 
     data = {
         "content": "content",
-        "emotion": 4,
+        "emotion": 3,
         "keyword": "keyword"
     }
 
@@ -49,6 +50,56 @@ def get_posts(request, date):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
     serializer = PostSerializer(queryset, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_report(request, date):
+    try:
+        queryset = DayReport.objects.get(
+            Q(family_id=request.user.family_id) &
+            Q(date=date)
+        )
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    serializer = DayReportSerializer(queryset)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_reports(request, date):
+    try:
+        queryset = DayReport.objects.filter(
+            Q(family_id=request.user.family_id) &
+            Q(date__year=date.year) &
+            Q(date__month=date.month)
+        )
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    serializer = DayReportSerializer(queryset, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_week_report(request, start):
+    try:
+        start_day = start
+        end_day = start_day + datetime.timedelta(days=6)
+
+        queryset = DayReport.objects.filter(
+            Q(family_id=request.user.family_id) &
+            Q(date__range=[start_day, end_day])
+        )
+        
+    except Exception:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    serializer = WeekReportSerializer(queryset, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 class PostViewSet(viewsets.ModelViewSet):
