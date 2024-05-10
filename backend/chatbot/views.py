@@ -88,7 +88,7 @@ sex = 'female'
 age = 60
 interest = '임영웅', '봄', '강아지'
 diasease = '당뇨'
-prompt_list = [
+prompt_list_default = [
                 '너는 혼자계신 시니어분의 말동무 역할을 수행하게 될거야. 사용자의 정보를 알려줄게',
                 f'시니어 분의 성별은 {sex}이고 나이는 {age}세 이시며 관심사로는 {interest}등이 있고 {diasease}와 같은 질병을 앓고 계셔',
                 '위 정보를 참고해서 이 분이 심심하지 않으시게 일상생활의 간단한 질문이나 대답을 해주면 되',
@@ -112,14 +112,53 @@ def chatbot(request):
             f.write(user_input + '\n')
         
         # Create prompt & Get response
-        prompt = create_prompt(user_input, prompt_list)
+        prompt = create_prompt(user_input, prompt_list_default)
         response = get_ai_response(prompt)
 
         print(f'Response data: {response}')
 
         # If response exist update_list & Get response reply
         if response:
-            update_list(response, prompt_list)
+            update_list(response, prompt_list_default)
+            pos = response.find("\nAI: ")
+            response = response[pos + 4:]
+        else:
+            response = "response message not exist"
+        print(f'Reply: {response}')
+        
+        # Create output.wav file with response reply through text_to_speech func
+        text_to_speech(response)
+
+        # Set output.wav to FileResponse format
+        f = open('media/output.wav', "rb")
+        audio_response = FileResponse(f)
+        audio_response.set_headers(f)
+
+        return audio_response
+    else:
+        return JsonResponse({'error': 'POST request required'})
+    
+# 설정시각 되면 알람 울림 -> 알람 종료하면 해당 알람 관련 내용 프론트에서 보냄
+# 해당 알림 관련 내용으로 프롬프트 생성 -> 대화 시작
+
+prompt_list_routine = [ '첫 문장의 내용은 시니어의 일상 루틴에 관한 알람 내용으로 아침, 점심, 저녁 안부나 시니어의 활동 수행 여부에 관한',
+                        '내용으로 각 상황에 맞게 시니어에게 안부 인사나 수행에 관련 간단한 질문이나 대화를 한 두 문장으로 대화를 시작해줘' ]
+
+@api_view(['POST'])
+def routine(request):
+    if request.method == 'POST':
+        user_input = request.POST.get('text', '')
+        print(f'Input: {user_input}')
+        
+        # Create prompt & Get response
+        prompt = user_input.append(prompt_list_routine)
+        response = get_ai_response(prompt)
+
+        print(f'Response data: {response}')
+
+        # If response exist update_list & Get response reply
+        if response:
+            update_list(response, prompt_list_routine)
             pos = response.find("\nAI: ")
             response = response[pos + 4:]
         else:
