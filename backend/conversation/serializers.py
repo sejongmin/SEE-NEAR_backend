@@ -1,7 +1,7 @@
-from rest_framework import serializers
+import numpy as np
 from rest_framework.serializers import ModelSerializer
 from .models import Post, DayReport
-from .reportFunc import calculateEmotionRate, calculateBadRate
+from .functions.emotion_calulation import calculateEmotionRate, calculateBadRate
 from authentication.models import Family
 
 class PostSerializer(ModelSerializer):
@@ -24,7 +24,7 @@ class PostSerializer(ModelSerializer):
     
     def update(self, post, data):
         post.content = data.get("content")
-        post.emotion = data.get("emotion")
+        post.emotion = np.argmax(data.get("emotion"))
         post.keyword = data.get("keyword")
         post.save()
         return post
@@ -48,7 +48,8 @@ class DayReportSerializer(ModelSerializer):
         post_count = getattr(report, "post_count")
         setattr(report, "post_count", post_count + 1)
 
-        emotion = f"emotion_{data['emotion']}"
+        emotion_label = np.argmax(data['emotion'])
+        emotion = f"emotion_{emotion_label}"
         emotion_count = getattr(report, emotion)
         setattr(report, emotion, emotion_count + 1)
 
