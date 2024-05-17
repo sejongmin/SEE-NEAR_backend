@@ -25,7 +25,7 @@ class PostSerializer(ModelSerializer):
     def update(self, post, data):
         post.content = data.get("content")
         post.emotion = np.argmax(data.get("emotion"))
-        post.keyword = data.get("keyword")
+        post.keyword = data.get("keyword")[0][0]
         post.save()
         return post
     
@@ -54,14 +54,14 @@ class DayReportSerializer(ModelSerializer):
         setattr(report, emotion, emotion_count + 1)
 
         keywords = getattr(report, "keywords")
-        setattr(report, "keywords", keywords + " " + data["keyword"])
+        setattr(report, "keywords", keywords + " " + data["keyword"][0][0])
 
         emotion_rate = getattr(report, "emotion_rate")
         updated_emotion_rate = calculateEmotionRate(emotion_rate, data["emotion"], post_count)
         setattr(report, "emotion_rate", updated_emotion_rate)
 
         bad_rate = getattr(report, "bad_rate")
-        updated_bad_rate = calculateBadRate(bad_rate, data["emotion"], post_count)
+        updated_bad_rate = calculateBadRate(bad_rate, emotion_label, post_count)
         setattr(report, "bad_rate", updated_bad_rate)
 
         report.save()
