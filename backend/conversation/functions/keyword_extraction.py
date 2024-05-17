@@ -31,7 +31,7 @@ def pagerank(x, df=0.85, max_iter=30, bias=None):
 
     # initialize (정규화, 벡터 초기화)
     A = normalize(x, axis=0, norm='l1')
-    R = np.ones(A.shape[0]).reshape(-1,1)
+    R = np.ones(A.shape[0]).reshape(-1, 1)
 
     # bias는 우선순위 (알고리즘에 따라/init + 갱신)
     if bias is None:
@@ -367,7 +367,9 @@ def komoran_tokenizer(sent):
 # test = summarizer.summarize(sents, topk=1)
 # print(test)
 
-def keyword_extraction(sents):
+def keyword_extraction(path):
+    with open(path, "r", encoding='utf-8') as f:
+        sents = f.readlines()
     summarizer = KeywordSummarizer(tokenize=komoran_tokenizer, min_count=2, min_cooccurrence=1)
     test = summarizer.summarize(sents, topk=1)  
     return test

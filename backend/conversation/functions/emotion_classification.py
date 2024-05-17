@@ -1,14 +1,9 @@
 import numpy as np
 import librosa
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, LSTM, Dropout
 from tensorflow.python.keras.models import load_model
+from constant.conversation import *
 
-num_mfcc = 13
-n_fft = 2048
-hop_length = 512
-SAMPLE_RATE = 22050
-max_len = 100
 
 # def build_model(input_shape):
 #     model = tf.keras.Sequential()
@@ -23,17 +18,17 @@ max_len = 100
 
 #     return model
 
-model = load_model('media/Speech-Emotion-Recognition-Model.h5')
+model = load_model(EMOTION_MODEL)
 
 def emotion_classification(input_path):
     signal, sample_rate = librosa.load(input_path, sr=SAMPLE_RATE)
-    mfccs = librosa.feature.mfcc(y=signal, sr=sample_rate, n_mfcc=num_mfcc, n_fft=n_fft, hop_length=hop_length)
+    mfccs = librosa.feature.mfcc(y=signal, sr=sample_rate, n_mfcc=N_MFCC, n_fft=N_FFT, hop_length=HOP_LENGTH)
 
     # Transpose mfccs to have time steps as the first dimension
     mfccs = mfccs.T
 
     # Pad the sequence to a fixed length
-    data = tf.keras.preprocessing.sequence.pad_sequences([mfccs], maxlen=max_len, padding='post', truncating='post')
+    data = tf.keras.preprocessing.sequence.pad_sequences([mfccs], maxlen=MAX_LENGTH, padding='post', truncating='post')
 
     # Load the pre-trained model
     # model.summary()
