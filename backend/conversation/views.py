@@ -1,6 +1,7 @@
 import os
 import datetime
 from django.db.models import Q
+from django.http import JsonResponse, FileResponse
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -138,3 +139,43 @@ class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
+
+prompt_list_default = [
+    '너는 혼자계신 시니어분의 말동무 역할을 수행하게 될거야. 사용자의 정보를 알려줄게',
+    f'시니어 분의 성별은 {sex}, 나이는 {age}세, 관심사는 {interest}, 질병은 {diasease}',
+    '위 정보를 참고해서 이 분이 심심하지 않으시게 일상생활의 간단한 질문이나 대답을 해주면 되',
+    '너무 자세하게 질문과 대답을 하기보단 호응해주고 맞춰주는 식으로 대화를 해줘',
+    '무조건 존댓말로 대답해줘',
+]
+
+@api_view(['POST'])
+def chatbot(request):
+    if request.method == 'POST':
+        user_input = request.POST.get('text', '')
+
+        text_path = os.path.join(settings.MEDIA_ROOT, 'text.txt')
+        if not os.path.exists(text_path):
+            open(text_path, 'w').close()
+
+        with open(text_path, 'a') as f:
+            f.write(user_input + '\n')
+        
+        prompt = create_prompt(user_input, prompt_list_default)
+        response = get_ai_response(prompt)
+
+        if response:
+            update_list(response, prompt_list_default)
+            pos = response.find("\nAI: ")
+            response = response[pos + 4:]
+        else:
+            response = "response message not exist"
+        
+        text_to_speech(response)
+
+        f = open('media/output.wav', "rb")
+        audio_response = FileResponse(f)
+        audio_response.set_headers(f)
+
+        return audio_response
+    else:
+        return JsonResponse({'error': 'POST request required'})

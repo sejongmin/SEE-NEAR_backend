@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow.python.keras.models import load_model
 from constant.conversation import *
 
+
 # def build_model(input_shape):
 #     model = tf.keras.Sequential()
 
