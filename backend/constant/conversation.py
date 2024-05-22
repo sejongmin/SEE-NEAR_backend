@@ -1,8 +1,11 @@
 # chatbot.py constant
 GPT_MODEL = 'gpt-4o'
 GPT_ROLE = 'system'
+MAX_TOKENS = 10
+TEMPERATURE = 0.8
 TTS_MODEL = 'tts-1-hd'
 TTS_VOICE = 'alloy'
+TTS_SPEED = 1
 AUDIO_RESPONSE_FORMAT = 'wav'
 
 # emotion_classification.py constant
@@ -16,6 +19,9 @@ MAX_LENGTH = 100
 # emotion_calulation.py constant
 WEIGHTS = [[1.0], [0.5], [0.15], [0.1]]
 BAD_EMOTIONS = [0, 1]
+
+# keyword_extraction.py constant
+KEYWORD_MODEL = 'skt/kobert-base-v1'
 
 # views.py constant
 TEXT_PATH = 'media/text.txt'

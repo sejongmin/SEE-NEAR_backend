@@ -25,8 +25,8 @@ def get_ai_response(prompt):
                 "content": prompt
             },
         ],
-        max_tokens=10,
-        temperature=0.8,
+        max_tokens=MAX_TOKENS,
+        temperature=TEMPERATURE,
         stop=[' Human:', ' AI:']
         )
         return response.choices[0].message.content
@@ -39,7 +39,7 @@ def text_to_speech(response):
         model=TTS_MODEL,
         voice=TTS_VOICE,
         input=response,
-        speed=1,
+        speed=TTS_SPEED,
         response_format = AUDIO_RESPONSE_FORMAT
         )
         return response.stream_to_file(AUDIO_OUTPUT_PATH)
