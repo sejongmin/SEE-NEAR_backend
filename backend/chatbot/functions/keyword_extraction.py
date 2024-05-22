@@ -1,7 +1,7 @@
 from keybert import KeyBERT
 from kiwipiepy import Kiwi
 from transformers import BertModel
-from constant.conversation import *
+from constant.chatbot import *
 
 # sents="""오늘 허리가 많이 아팠어 잠을 좀 잘 못 잤나봐.
 # 찜질이랑 스트레칭을 해야 되는데, 찜질팩이 집에 없어

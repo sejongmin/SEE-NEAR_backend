@@ -2,7 +2,7 @@ import numpy as np
 import librosa
 import tensorflow as tf
 from tensorflow.python.keras.models import load_model
-from constant.conversation import *
+from constant.chatbot import *
 
 model = load_model(EMOTION_MODEL)
 

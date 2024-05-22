@@ -1,5 +1,6 @@
 from openai import OpenAI
 from django.conf import settings
+from constant.chatbot import *
 
 client = OpenAI(
     api_key=settings.OPENAI_API_KEY,
@@ -17,10 +18,10 @@ def create_prompt(user_input, prompt_list):
 def get_ai_response(prompt):
     try:
         response = client.chat.completions.create(
-        model="gpt-4",
+        model=GPT_MODEL,
         messages = [
             {
-                "role": "system",
+                "role": GPT_ROLE,
                 "content": prompt
             },
         ],
@@ -35,12 +36,12 @@ def get_ai_response(prompt):
 def text_to_speech(response):
     try:
         response = client.audio.speech.create(
-        model='tts-1-hd',
-        voice="alloy",
+        model=TTS_MODEL,
+        voice=TTS_VOICE,
         input=response,
-        speed=1,
-        response_format = 'wav'
+        speed=TTS_SPEED,
+        response_format = AUDIO_RESPONSE_FORMAT
         )
-        return response.stream_to_file("media/output.wav")
+        return response.stream_to_file(AUDIO_OUTPUT_PATH)
     except Exception as e:
         print('error', e)
