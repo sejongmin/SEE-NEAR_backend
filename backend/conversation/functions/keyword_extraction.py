@@ -28,6 +28,6 @@ def keyword_extraction(sents):
     nouns = noun_extractor(sents)
     text = ' '.join(nouns)
     keywords = kw_model.extract_keywords(text, keyphrase_ngram_range=(1, 1), stop_words=None, use_mmr = 1, use_maxsum = 1, top_n=3) #중복방지 mmr, 코사인유사도 다르게 표현
-    return keywords[0][0]
+    return keywords
 
 # print(keyword_extraction(sents))
