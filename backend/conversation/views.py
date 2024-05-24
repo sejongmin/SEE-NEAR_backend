@@ -26,7 +26,7 @@ def create_post(request):
         return Response(response_data, status=status.HTTP_201_CREATED)
     
     except Exception as e:
-        response_data = {'error': e}
+        response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["PUT"])
@@ -46,8 +46,8 @@ def update_post(request, pk):
 
         data = {
             "content": "content",
-            "emotion": 0,
-            "keyword": "keyword"
+            "emotion": emotion,
+            "keyword": keyword
         }
 
         postSerializer.update(post=post, data=data)
@@ -60,7 +60,7 @@ def update_post(request, pk):
         return Response(response_data, status=status.HTTP_200_OK)
     
     except Exception as e:
-        response_data = {'error': e}
+        response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["GET"])
@@ -74,10 +74,11 @@ def get_posts(request, date):
         )
 
         serializer = PostSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        response_data = serializer.data
+        return Response(response_data, status=status.HTTP_200_OK)
     
     except Exception as e:
-        response_data = {'error': e}
+        response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(["GET"])
@@ -91,10 +92,11 @@ def get_report(request, date):
         )
 
         serializer = DayReportSerializer(queryset)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        response_data = serializer.data
+        return Response(response_data, status=status.HTTP_200_OK)
     
     except Exception as e:
-        response_data = {'error': e}
+        response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["GET"])
@@ -109,10 +111,11 @@ def get_reports(request, date):
         )
 
         serializer = DayReportSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        response_data = serializer.data
+        return Response(response_data, status=status.HTTP_200_OK)
     
     except Exception as e:
-        response_data = {'error': e}
+        response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(["GET"])
@@ -129,10 +132,11 @@ def get_week_report(request, start):
         )
 
         serializer = WeekReportSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        response_data = serializer.data
+        return Response(response_data, status=status.HTTP_200_OK)
     
     except Exception as e:
-        response_data = {'error': e}
+        response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
 class PostViewSet(viewsets.ModelViewSet):

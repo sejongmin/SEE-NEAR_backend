@@ -12,22 +12,27 @@ from constant.authentication import *
 @api_view(['POST'])
 def signup(request):
     try:
-        serializer = UserSerializer(data=request.data)
+        userSerializer = UserSerializer(data=request.data)
         username = request.data.get('username')
 
-        if serializer.is_valid():
-            serializer.save()
+        if userSerializer.is_valid():
+            userSerializer.save()
             user = User.objects.get(username=username)
             token = Token.objects.get(user=user)
-
-            response_data = {'user': serializer.data, 'token': token.key}
+            family = {'id': ''}
+            if user.is_senior:
+                familySerializer = FamilySerializer()
+                familySerializer.create(user=user)
+                family = Family.objects.get(senior_id=user.id)
+            response_data = {'user': userSerializer.data, 'token': token.key}
+            response_data['family_id'] = family.id
             return Response(response_data, status=status.HTTP_201_CREATED)
         
-        response_data = {'error': serializer.errors}
+        response_data = {'error': userSerializer.errors}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
     
     except Exception as e:
-        response_data = {'error': e}
+        response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
@@ -45,7 +50,7 @@ def login(request):
                 response_data = {'token': token.key}
             elif created_token: 
                 response_data = {'token': created_token.key}
-
+            response_data['is_senior'] = user.is_senior
             return Response(response_data, status=status.HTTP_202_ACCEPTED)
         
         response_data = {'error': USER_ERROR_MESSAGE}
@@ -72,26 +77,27 @@ def logout(request):
         response_data = {'error': e}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def create_family(request):
-    try:
-        serializer = FamilySerializer(data=request.data)
+# @api_view(['POST'])
+# @authentication_classes([TokenAuthentication])
+# @permission_classes([IsAuthenticated])
+# def create_family(request):
+#     try:
+#         serializer = FamilySerializer(data=request.data)
 
-        if serializer.is_valid():
-            user = request.user
-            serializer.create(user=user)
-            family = Family.objects.get(senior_id=user.id)
-            response_data = {'id': family.id, 'family': serializer.data}
-            return Response(response_data, status=status.HTTP_201_CREATED)
+#         if serializer.is_valid():
+#             user = request.user
+#             serializer.create(user=user)
+#             family = Family.objects.get(senior_id=user.id)
+#             response_data = serializer.data
+#             response_data['id'] = family.id
+#             return Response(response_data, status=status.HTTP_201_CREATED)
         
-        response_data = {'error': serializer.errors}
-        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+#         response_data = {'error': serializer.errors}
+#         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
     
-    except Exception as e:
-        response_data = {'error': e}
-        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+#     except Exception as e:
+#         response_data = {'error': str(e)}
+#         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PUT'])
 @authentication_classes([TokenAuthentication])
@@ -105,7 +111,7 @@ def join_family(request):
         return Response(response_data, status=status.HTTP_200_OK)
     
     except Exception as e:
-        response_data = {'error': e}
+        response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
     
 class UserViewSet(viewsets.ModelViewSet):
