@@ -5,44 +5,42 @@ from django.http import JsonResponse
 from django.http import FileResponse
 from django.conf import settings
 from .functions.chatbot import *
-from .functions.keyword_extraction import *
-from .functions.emotion_classification import *
 from constant.chatbot import *
 from prompt.prompt import *
 from os import remove
 import os
 
-@api_view(['GET'])
-def startConversation(request):
-    print("대화 시작") # 주석 처리
+# @api_view(['GET'])
+# def startConversation(request):
+#     print("대화 시작") # 주석 처리
     
-    return Response({'message': CONVERSATION_START_MESSAGE})
+#     return Response({'message': CONVERSATION_START_MESSAGE})
 
-@api_view(['GET'])
-def endConversation(request):
-    print("대화 종료") # 주석 처리
+# @api_view(['GET'])
+# def endConversation(request):
+#     print("대화 종료") # 주석 처리
     
-    with open(TEXT_PATH, "r", encoding=ENCODING) as f:
-        text = f.readlines()
+#     with open(TEXT_PATH, "r", encoding=ENCODING) as f:
+#         text = f.readlines()
         
-    keyword = keyword_extraction(text)
-    print("keyword:", keyword[0]) # 주석 처리
-    emotion = emotion_classification(AUDIO_INPUT_WAV_PATH)
-    print("Predicted emotion:", emotion) # 주석 처리
+#     keyword = keyword_extraction(text)
+#     print("keyword:", keyword[0]) # 주석 처리
+#     emotion = emotion_classification(AUDIO_INPUT_WAV_PATH)
+#     print("Predicted emotion:", emotion) # 주석 처리
     
     
-    # text_path = TEXT_PATH
-    # audio_path = AUDIO_INPUT_WAV_PATH
-    # audio_path2 = AUDIO_INPUT_WEBM_PATH
-    # audio_path3 = AUDIO_OUTPUT_PATH
+#     # text_path = TEXT_PATH
+#     # audio_path = AUDIO_INPUT_WAV_PATH
+#     # audio_path2 = AUDIO_INPUT_WEBM_PATH
+#     # audio_path3 = AUDIO_OUTPUT_PATH
 
-    remove(TEXT_PATH)
-    remove(AUDIO_INPUT_WAV_PATH)
-    remove(AUDIO_INPUT_WEBM_PATH)
-    remove(AUDIO_OUTPUT_PATH)
-    print('파일 삭제') # 주석 처리
+#     remove(TEXT_PATH)
+#     remove(AUDIO_INPUT_WAV_PATH)
+#     remove(AUDIO_INPUT_WEBM_PATH)
+#     remove(AUDIO_OUTPUT_PATH)
+#     print('파일 삭제') # 주석 처리
     
-    return Response({'message': CONVERSATION_END_MESSAGE})
+#     return Response({'message': CONVERSATION_END_MESSAGE})
 
 # @api_view(['GET'])
 # def getSummary(request):
