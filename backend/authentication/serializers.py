@@ -31,17 +31,13 @@ class UserSerializer(serializers.ModelSerializer):
 class FamilySerializer(serializers.ModelSerializer):
     class Meta:
         model = Family
-        fields = ("id", "family_name", "senior_id", "senior_birth", "senior_gender", "senior_diseases", "senior_interests")
+        fields = '__all__'
         read_only_fields = ("id",)
         
     def create(self, user):
         new_family = Family.objects.create(
-            family_name = self.validated_data.get("family_name"),
             senior_id = user,
             senior_birth = user.birth,
-            senior_gender = self.validated_data.get("senior_gender"),
-            senior_diseases = self.validated_data.get("senior_diseases"),
-            senior_interests = self.validated_data.get("senior_interests")
         )
         new_family.save()
 
