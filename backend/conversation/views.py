@@ -9,7 +9,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Post, DayReport
 from .serializers import PostSerializer, DayReportSerializer, WeekReportSerializer
-from .functions.chatbot import *
 from .functions.keyword_extraction import *
 from .functions.emotion_classification import *
 from constant.conversation import *
@@ -37,8 +36,10 @@ def update_post(request, pk):
         postSerializer = PostSerializer()
         post = Post.objects.get(pk=pk)
 
-        keyword = keyword_extraction(TEXT_PATH)
+        keyword = keyword_extraction()
+        print(keyword)
         emotion = emotion_classification(AUDIO_INPUT_WAV_PATH)
+        print(emotion)
         os.remove(TEXT_PATH)
         os.remove(AUDIO_INPUT_WAV_PATH)
         os.remove(AUDIO_INPUT_WEBM_PATH)
@@ -49,7 +50,8 @@ def update_post(request, pk):
             "emotion": emotion,
             "keyword": keyword
         }
-
+        print(data)
+        
         postSerializer.update(post=post, data=data)
 
         reportSerializer = DayReportSerializer()
