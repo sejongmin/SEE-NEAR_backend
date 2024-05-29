@@ -28,6 +28,7 @@ MAX_LENGTH = 100
 
 # keyword_extraction.py constant
 KEYWORD_MODEL = 'skt/kobert-base-v1'
+ENCODING = 'utf-8'
 
 # views.py constant
 TEXT_PATH = 'media/text.txt'

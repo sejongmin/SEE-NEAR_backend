@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Post, DayReport
 from .serializers import PostSerializer, DayReportSerializer
+
 from .functions.keyword_extraction import *
 from .functions.emotion_classification import *
 from constant.conversation import *
@@ -35,10 +36,10 @@ def update_post(request, pk):
         postSerializer = PostSerializer()
         post = Post.objects.get(pk=pk)
 
-        # emotion = [[0.97, 0.01, 0.01, 0.01]]
-        # keyword = [("안녕", "1"), ("안녕안녕", "2"), ("안녀엉", "3")]
-        keyword = keyword_extraction(TEXT_PATH)
+        keyword = keyword_extraction()
+        print(keyword)
         emotion = emotion_classification(AUDIO_INPUT_WAV_PATH)
+        print(emotion)
         os.remove(TEXT_PATH)
         os.remove(AUDIO_INPUT_WAV_PATH)
         os.remove(AUDIO_INPUT_WEBM_PATH)
@@ -48,7 +49,9 @@ def update_post(request, pk):
             "emotion": emotion,
             "keyword": keyword
         }
-        post = postSerializer.update(post=post, data=data)
+        print(data)
+        
+        postSerializer.update(post=post, data=data)
         reportSerializer = DayReportSerializer()
         report = reportSerializer.get_or_create(family=request.user.family_id, date=post.date)
         report = reportSerializer.update(report=report, data=data, post=post)
