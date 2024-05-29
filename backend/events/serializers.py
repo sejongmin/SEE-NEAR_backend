@@ -17,4 +17,3 @@ class EventSerializer(ModelSerializer):
             datetime = self.validated_data.get("datetime")
         )
         new_event.save()
-        return new_event
