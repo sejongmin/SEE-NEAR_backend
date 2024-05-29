@@ -1,14 +1,14 @@
 import os
 import datetime
 from django.db.models import Q
-from django.http import JsonResponse, FileResponse
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Post, DayReport
-from .serializers import PostSerializer, DayReportSerializer, WeekReportSerializer
+from .serializers import PostSerializer, DayReportSerializer
+
 from .functions.keyword_extraction import *
 from .functions.emotion_classification import *
 from constant.conversation import *
@@ -44,7 +44,6 @@ def update_post(request, pk):
         os.remove(AUDIO_INPUT_WAV_PATH)
         os.remove(AUDIO_INPUT_WEBM_PATH)
         os.remove(AUDIO_OUTPUT_PATH)
-
         data = {
             "content": "content",
             "emotion": emotion,
@@ -53,14 +52,11 @@ def update_post(request, pk):
         print(data)
         
         postSerializer.update(post=post, data=data)
-
         reportSerializer = DayReportSerializer()
         report = reportSerializer.get_or_create(family=request.user.family_id, date=post.date)
-        report = reportSerializer.update(report=report, data=data)
-
+        report = reportSerializer.update(report=report, data=data, post=post)
         response_data = {"message": UPDATE_POST_MESSAGE}
         return Response(response_data, status=status.HTTP_200_OK)
-    
     except Exception as e:
         response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
@@ -74,11 +70,9 @@ def get_posts(request, date):
             Q(family_id=request.user.family_id) &
             Q(date=date)
         )
-
         serializer = PostSerializer(queryset, many=True)
         response_data = serializer.data
         return Response(response_data, status=status.HTTP_200_OK)
-    
     except Exception as e:
         response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
@@ -92,11 +86,9 @@ def get_report(request, date):
             Q(family_id=request.user.family_id) &
             Q(date=date)
         )
-
         serializer = DayReportSerializer(queryset)
         response_data = serializer.data
         return Response(response_data, status=status.HTTP_200_OK)
-    
     except Exception as e:
         response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
@@ -111,11 +103,9 @@ def get_reports(request, date):
             Q(date__year=date.year) &
             Q(date__month=date.month)
         )
-
         serializer = DayReportSerializer(queryset, many=True)
         response_data = serializer.data
         return Response(response_data, status=status.HTTP_200_OK)
-    
     except Exception as e:
         response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
@@ -123,20 +113,91 @@ def get_reports(request, date):
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def get_week_report(request, start):
+def get_week_counts(request, start):
     try:
-        start_day = start
-        end_day = start_day + datetime.timedelta(days=6)
-
-        queryset = DayReport.objects.filter(
-            Q(family_id=request.user.family_id) &
-            Q(date__range=[start_day, end_day])
-        )
-
-        serializer = WeekReportSerializer(queryset, many=True)
-        response_data = serializer.data
+        response_data = []
+        for i in range(7):
+            date = start + datetime.timedelta(days=i)
+            try:
+                report = DayReport.objects.get(family_id=request.user.family_id, date=date)
+            except DayReport.DoesNotExist:
+                response_data.append({
+                    "date": date, 
+                    "emotion_0_count": 0, 
+                    "emotion_1_count": 0, 
+                    "emotion_2_count": 0, 
+                    "emotion_3_count": 0
+                })
+                continue
+            response_data.append({
+                "date": date, 
+                "emotion_0_count": report.emotion_0_count, 
+                "emotion_1_count": report.emotion_1_count, 
+                "emotion_2_count": report.emotion_2_count, 
+                "emotion_3_count": report.emotion_3_count
+            })
         return Response(response_data, status=status.HTTP_200_OK)
+    except Exception as e:
+        response_data = {'error': str(e)}
+        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
     
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_week_means(request, start):
+    try:
+        response_data = []
+        for i in range(7):
+            date = start + datetime.timedelta(days=i)
+            try:
+                report = DayReport.objects.get(family_id=request.user.family_id, date=date)
+            except DayReport.DoesNotExist:
+                response_data.append({
+                    "date": date, 
+                    "emotion_0_mean": 0, 
+                    "emotion_1_mean": 0, 
+                    "emotion_2_mean": 0, 
+                    "emotion_3_mean": 0
+                })
+                continue
+            response_data.append({
+                "date": date, 
+                "emotion_0_mean": report.emotion_0_mean, 
+                "emotion_1_mean": report.emotion_1_mean, 
+                "emotion_2_mean": report.emotion_2_mean, 
+                "emotion_3_mean": report.emotion_3_mean
+            })
+        return Response(response_data, status=status.HTTP_200_OK)
+    except Exception as e:
+        response_data = {'error': str(e)}
+        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_week_variances(request, start):
+    try:
+        response_data = []
+        for i in range(7):
+            date = start + datetime.timedelta(days=i)
+            posts = Post.objects.filter(
+                Q(family_id=request.user.family_id) &
+                Q(date=date)
+            )
+            try:
+                report = DayReport.objects.get(family_id=request.user.family_id, date=date)
+            except DayReport.DoesNotExist:
+                response_data.append({"date": date, "variance": 0})
+                continue
+            deviation = [0, 0, 0, 0]
+            for post in posts:
+                deviation[0] += (post.emotion_0 - report.emotion_0_mean) ** 2
+                deviation[1] += (post.emotion_1 - report.emotion_1_mean) ** 2
+                deviation[2] += (post.emotion_2 - report.emotion_2_mean) ** 2
+                deviation[3] += (post.emotion_3 - report.emotion_3_mean) ** 2
+            variance = sum(deviation) / report.post_count / 4
+            response_data.append({"date": date, "variance": variance})
+        return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
         response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
-from .models import User, Family
+from .models import User, Family, Routin
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -25,7 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
     def join(self, user, data):
         family = Family.objects.get(id=data.get("family_id"))
         user.family_id = family
-        user.role = data.get("role")
+        user.role = data.get("role", user.role)
         user.save()
 
 class FamilySerializer(serializers.ModelSerializer):
@@ -40,5 +40,32 @@ class FamilySerializer(serializers.ModelSerializer):
             senior_birth = user.birth,
         )
         new_family.save()
+    
+    def update(self, family, data):
+        family.senior_birth = data.get("senior_birth", family.senior_birth)
+        family.senior_id.birth = data.get("senior_birth", family.senior_id.birth)
+        family.senior_gender = data.get("senior_gender", family.senior_gender)
+        family.senior_diseases = data.get("senior_diseases", family.senior_diseases)
+        family.senior_interests = data.get("senior_interests", family.senior_interests)
+        family.save()
+        family.senior_id.save()
+        
+class MemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "username", "last_name", "first_name", "role")
 
-        return new_family
+class RoutinSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Routin
+        fields = ("id", "name", "time", "is_active")
+
+    def create(self, family):
+        family = Family.objects.get(id=family)
+        new_routin = Routin.objects.create(
+            family_id = family,
+            name = self.validated_data["name"],
+            time = self.validated_data["time"],
+            is_active = True
+        )
+        new_routin.save()
