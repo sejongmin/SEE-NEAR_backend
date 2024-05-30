@@ -11,6 +11,7 @@ from .serializers import PostSerializer, DayReportSerializer
 
 from .functions.keyword_extraction import *
 from .functions.emotion_classification import *
+from .functions.conversation_summary import *
 from constant.conversation import *
 
 @api_view(["GET"])
@@ -40,12 +41,14 @@ def update_post(request, pk):
         print(keyword)
         emotion = emotion_classification(AUDIO_INPUT_WAV_PATH)
         print(emotion)
+        content = conversation_summary()
+        print(content)
         os.remove(TEXT_PATH)
         os.remove(AUDIO_INPUT_WAV_PATH)
         os.remove(AUDIO_INPUT_WEBM_PATH)
         os.remove(AUDIO_OUTPUT_PATH)
         data = {
-            "content": "content",
+            "content": content,
             "emotion": emotion,
             "keyword": keyword
         }

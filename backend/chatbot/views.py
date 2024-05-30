@@ -139,19 +139,16 @@ def chatbot(request):
     else:
         return JsonResponse({'error': POST_REQUEST_ERROR_MESSAGE})
     
-# 아직 안바꿈 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# 아직 안바꿈 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# 아직 안바꿈 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# 아직 안바꿈 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# 아직 안바꿈 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# 프론트에서 routine text 주면 프롬프트 생성해서 답변 받아와 읽어줌
+# 그 답변 재생 이후 chatbot api 실행되게 함(conversation start 자동)
 @api_view(['POST'])
 def routine(request):
     if request.method == 'POST':
-        user_input = request.POST.get('text', '')
-        print(f'Input: {user_input}')
+        routine = request.POST.get('text', '')
+        print(f'Input: {routine}') # 주석처리
         
         # Create prompt & Get response
-        prompt = user_input.append(PROMPT_ROUTINE)
+        prompt = routine.append(PROMPT_ROUTINE)
         response = get_ai_response(prompt)
 
         # print(f'Response data: {response}')
@@ -162,17 +159,18 @@ def routine(request):
             # pos = response.find("\nAI: ")
             # response = response[pos + 4:]
         else:
-            response = "response message not exist"
+            response = NONE_RESPONSE_MESSAGE
         print(f'Reply: {response}')
         
         # Create output.wav file with response reply through text_to_speech func
         text_to_speech(response)
 
         # Set output.wav to FileResponse format
-        f = open('media/output.wav', "rb")
+        f = open(AUDIO_OUTPUT_PATH, "rb")
         audio_response = FileResponse(f)
         audio_response.set_headers(f)
 
         return audio_response
     else:
-        return JsonResponse({'error': 'POST request required'})
+        return JsonResponse({'error': POST_REQUEST_ERROR_MESSAGE})
+    
