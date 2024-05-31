@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from django.http import JsonResponse
 from django.http import FileResponse
 from django.conf import settings
+from pydub import AudioSegment
 from .functions.chatbot import *
 from constant.chatbot import *
 from prompt.prompt import *
@@ -84,28 +85,44 @@ import os
 def chatbot(request):
     if request.method == 'POST':
         # GET speech-recognition user_input text from frontend and print
+        audio = request.FILES.get('audio')
         user_input = request.POST.get('text', '')
         print(f'Input: {user_input}')
 
         # Append new user_input text data, if not exits, create new file and append
         # text_path = os.path.join(settings.MEDIA_ROOT, TEXT_PATH_2)
+        # audio_path = os.path.join(settings.MEDIA_ROOT, 'input.webm')
+        # input_audio_path = os.path.join(settings.MEDIA_ROOT, 'input.wav')
+        
+        if not os.path.exists(AUDIO_INPUT_WEBM_PATH):
+            open(AUDIO_INPUT_WEBM_PATH, 'wb').close()
+            
+        with open(AUDIO_INPUT_WEBM_PATH, 'ab') as f:
+            for chunk in audio.chunks():
+                f.write(chunk)
+        
+        sound = AudioSegment.from_file(AUDIO_INPUT_WEBM_PATH, format=AUDIO_INPUT_WEBM_FORMAT)
+        if sound.frame_rate != FRAME_RATE:
+            sound = sound.set_frame_rate(FRAME_RATE)
+        sound.export(AUDIO_INPUT_WAV_PATH, format=AUDIO_INPUT_WAV_FORMAT)
+        
         if not os.path.exists(TEXT_PATH):
             open(TEXT_PATH, 'w').close()
 
-        with open(TEXT_PATH, 'a') as f:
+        with open(TEXT_PATH, 'a', encoding=ENCODING) as f:
             f.write(user_input + '\n')
         
         # Create prompt & Get response
         prompt = create_prompt(user_input, PROMPT_DEFAULT)
         response = get_ai_response(prompt)
 
-        print(f'Response data: {response}') 
+        # print(f'Response data: {response}') 
 
         # If response exist update_list & Get response reply
         if response:
             update_list(response, PROMPT_DEFAULT)
-            pos = response.find("\nAI: ")
-            response = response[pos + 4:]
+            # pos = response.find("\nAI: ")
+            # response = response[pos + 4:]
         else:
             response = NONE_RESPONSE_MESSAGE
         print(f'Reply: {response}')
@@ -122,40 +139,38 @@ def chatbot(request):
     else:
         return JsonResponse({'error': POST_REQUEST_ERROR_MESSAGE})
     
-# 아직 안바꿈 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# 아직 안바꿈 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# 아직 안바꿈 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# 아직 안바꿈 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# 아직 안바꿈 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# 프론트에서 routine text 주면 프롬프트 생성해서 답변 받아와 읽어줌
+# 그 답변 재생 이후 chatbot api 실행되게 함(conversation start 자동)
 @api_view(['POST'])
 def routine(request):
     if request.method == 'POST':
-        user_input = request.POST.get('text', '')
-        print(f'Input: {user_input}')
+        routine = request.POST.get('text', '')
+        print(f'Input: {routine}') # 주석처리
         
         # Create prompt & Get response
-        prompt = user_input.append(PROMPT_ROUTINE)
+        prompt = routine.append(PROMPT_ROUTINE)
         response = get_ai_response(prompt)
 
-        print(f'Response data: {response}')
+        # print(f'Response data: {response}')
 
         # If response exist update_list & Get response reply
         if response:
             update_list(response, PROMPT_ROUTINE)
-            pos = response.find("\nAI: ")
-            response = response[pos + 4:]
+            # pos = response.find("\nAI: ")
+            # response = response[pos + 4:]
         else:
-            response = "response message not exist"
+            response = NONE_RESPONSE_MESSAGE
         print(f'Reply: {response}')
         
         # Create output.wav file with response reply through text_to_speech func
         text_to_speech(response)
 
         # Set output.wav to FileResponse format
-        f = open('media/output.wav', "rb")
+        f = open(AUDIO_OUTPUT_PATH, "rb")
         audio_response = FileResponse(f)
         audio_response.set_headers(f)
 
         return audio_response
     else:
-        return JsonResponse({'error': 'POST request required'})
+        return JsonResponse({'error': POST_REQUEST_ERROR_MESSAGE})
+    
