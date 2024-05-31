@@ -2,6 +2,7 @@ import os
 import calendar
 import datetime
 from django.db.models import Q
+from django.http import FileResponse
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -13,6 +14,7 @@ from .serializers import PostSerializer, DayReportSerializer
 from .functions.keyword_extraction import *
 from .functions.emotion_classification import *
 from .functions.conversation_summary import *
+from .functions.create_wordcloud import *
 from constant.conversation import *
 
 @api_view(["GET"])
@@ -219,6 +221,25 @@ def create_dummy_data(request, date):
                 report = reportSerializer.update(report=report, data=data, post=post)
         response_data = {"message": UPDATE_POST_MESSAGE}
         return Response(response_data, status=status.HTTP_200_OK)
+    except Exception as e:
+        response_data = {'error': str(e)}
+        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_word_cloud(request, start):
+    try:
+        keywords = ""
+        for i in range(7):
+            date = start + datetime.timedelta(days=i)
+            try:
+                report = DayReport.objects.get(family_id=request.user.family_id, date=date)
+                keywords += report.keywords
+            except DayReport.DoesNotExist:
+                continue
+        createWordCloud(keywords)
+        # 이미지 통신
     except Exception as e:
         response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)

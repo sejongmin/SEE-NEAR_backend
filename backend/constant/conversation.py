@@ -1,3 +1,5 @@
+BASE_PATH = "backend/"
+
 # chatbot.py constant
 GPT_MODEL = 'gpt-4o'
 GPT_ROLE = 'system'
@@ -10,15 +12,16 @@ AUDIO_RESPONSE_FORMAT = 'wav'
 
 # models.py Dayreport Emotion Choice
 EMOTION_CHOICES = [
-    (0, "neutral"),
-    (1, "angry"),
-    (2, "sad"),
+    (0, "angry"),
+    (1, "sad"),
+    (2, "neutral"),
     (3, "happy")
 ]
 
 EMOTION_COUNT = len(EMOTION_CHOICES)
 
 # emotion_classification.py constant
+
 EMOTION_MODEL = 'media/Speech-Emotion-Recognition-Model_FINAL.h5'
 N_MFCC = 13
 N_FFT = 2048
@@ -30,10 +33,17 @@ MAX_LENGTH = 100
 KEYWORD_MODEL = 'skt/kobert-base-v1'
 ENCODING = 'utf-8'
 
+# craete_wordcloud.py constant
+BACKGROUND_COLOR = "white"
+MAX_WORDS = 150
+WIDTH = 500
+HEIGHT = 500
+FONT_PATH = "media/AppleGothic.ttf"
+WORDCLOUD_PATH = "media/wordcloud.png"
+
 # views.py constant
 TEXT_PATH = 'media/text.txt'
 AUDIO_INPUT_WAV_PATH = 'media/input.wav'
 AUDIO_INPUT_WEBM_PATH = 'media/input.webm'
 AUDIO_OUTPUT_PATH = 'media/output.wav'
-
 UPDATE_POST_MESSAGE = "update was successful"

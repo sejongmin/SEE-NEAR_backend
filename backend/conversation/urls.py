@@ -31,6 +31,8 @@ urlpatterns = [
     path("week/mean/<date:start>/", get_week_means, name="get-week-mean"),
     path("week/var/<date:start>", get_week_variances, name="get-week-variance"),
     path("week/var/<date:start>/", get_week_variances, name="get-week-variance"),
+    path("week/keyword/<date:start>", get_word_cloud, name="get-word-cloud"),
+    path("week/keyword/<date:start>/", get_word_cloud, name="get-word-cloud"),
 
     path("dummy/<year-month:date>", create_dummy_data),
     path("dummy/<year-month:date>/", create_dummy_data),
