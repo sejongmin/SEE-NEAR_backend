@@ -36,6 +36,22 @@ class PostSerializer(serializers.ModelSerializer):
         post.save()
         return post
     
+    def createDummy(self, family, data):
+        family = Family.objects.get(id=family)
+        new_post = Post.objects.create(
+            family_id = family,
+            date = data["date"],
+            content = data["content"],
+            keyword = data["keyword"][0][0] + " " + data["keyword"][1][0] + " " + data["keyword"][2][0],
+            emotion = np.argmax(data["emotion"]),
+            emotion_0 = data["emotion"][0][0],
+            emotion_1 = data["emotion"][0][1],
+            emotion_2 = data["emotion"][0][2],
+            emotion_3 = data["emotion"][0][3],
+        )
+        new_post.save()
+        return new_post
+    
 class DayReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = DayReport
