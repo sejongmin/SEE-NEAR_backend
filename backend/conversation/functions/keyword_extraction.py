@@ -22,7 +22,9 @@ def noun_extractor(text):
             results.append(token)
     return results
 
-def keyword_extraction(sents):
+def keyword_extraction():
+    with open(TEXT_PATH, "r", encoding=ENCODING) as f:
+        sents = f.read()
     model = BertModel.from_pretrained(KEYWORD_MODEL) #한국어 특화 kobert 모델로 단어 임베딩하기
     kw_model = KeyBERT(model)
     nouns = noun_extractor(sents)
