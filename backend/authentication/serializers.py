@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
-from .models import User, Family, Routin
+from .models import User, Family, Routine
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -55,17 +55,17 @@ class MemberSerializer(serializers.ModelSerializer):
         model = User
         fields = ("id", "username", "last_name", "first_name", "role")
 
-class RoutinSerializer(serializers.ModelSerializer):
+class RoutineSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Routin
+        model = Routine
         fields = ("id", "name", "time", "is_active")
 
     def create(self, family):
         family = Family.objects.get(id=family)
-        new_routin = Routin.objects.create(
+        new_routine = Routine.objects.create(
             family_id = family,
             name = self.validated_data["name"],
             time = self.validated_data["time"],
             is_active = True
         )
-        new_routin.save()
+        new_routine.save()
