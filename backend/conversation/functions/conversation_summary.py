@@ -49,5 +49,4 @@ def conversation_summary():
             list.append(tokenizer.decode(summary_ids[0][i]))
         flag = 0
 
-    summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
-    return summary
+    return ''.join(list)
