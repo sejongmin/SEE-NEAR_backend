@@ -1,4 +1,3 @@
-import numpy as np
 from constant.conversation import *
 
 def updateEmotionMean(mean, emotion, count):

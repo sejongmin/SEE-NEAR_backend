@@ -1,4 +1,4 @@
-BASE_PATH = "backend/"
+BASE_PATH = "backend"
 
 # chatbot.py constant
 GPT_MODEL = 'gpt-4o'

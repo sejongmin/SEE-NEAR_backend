@@ -7,6 +7,6 @@ def createWordCloud(text):
             max_words=MAX_WORDS,
             width=WIDTH,
             height=HEIGHT,
-            font_path=BASE_PATH + FONT_PATH
+            font_path=FONT_PATH
         ).generate(text)
-    wordcloud.to_file(filename=BASE_PATH+WORDCLOUD_PATH)
+    wordcloud.to_file(filename= WORDCLOUD_PATH)

@@ -2,7 +2,6 @@ import os
 import calendar
 import datetime
 from django.db.models import Q
-from django.http import FileResponse
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -118,9 +117,9 @@ def get_reports(request, date):
         response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
     
-def createResponseData(option, date, values):
+def createResponseData(option, id, values):
     data = {}
-    data["date"] = date
+    data["id"] = id
     if option == "variance":
         data["variance"] = values
     elif option == "count" or option == "mean":
@@ -133,55 +132,16 @@ def createResponseData(option, date, values):
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def get_week_counts(request, start):
+def get_week(request, start):
     try:
-        response_data = []
+        counts_data, means_data, variances_data = [], [], []
         for i in range(7):
             date = start + datetime.timedelta(days=i)
+            posts = Post.objects.filter(Q(family_id=request.user.family_id) & Q(date=date))
             try:
                 report = DayReport.objects.get(family_id=request.user.family_id, date=date)
-                data = createResponseData("count", date, [report.emotion_0_count, report.emotion_1_count, report.emotion_2_count, report.emotion_3_count])
-            except DayReport.DoesNotExist:
-                data = createResponseData("count", date, [0, 0, 0, 0])
-            response_data.append(data)
-        return Response(response_data, status=status.HTTP_200_OK)
-    except Exception as e:
-        response_data = {'error': str(e)}
-        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
-    
-@api_view(["GET"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def get_week_means(request, start):
-    try:
-        response_data = []
-        for i in range(7):
-            date = start + datetime.timedelta(days=i)
-            try:
-                report = DayReport.objects.get(family_id=request.user.family_id, date=date)
-                data = createResponseData("mean", date, [report.emotion_0_mean, report.emotion_1_mean, report.emotion_2_mean, report.emotion_3_mean])
-            except DayReport.DoesNotExist:
-                data = createResponseData("mean", date, [0, 0, 0, 0])
-            response_data.append(data)
-        return Response(response_data, status=status.HTTP_200_OK)
-    except Exception as e:
-        response_data = {'error': str(e)}
-        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(["GET"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def get_week_variances(request, start):
-    try:
-        response_data = []
-        for i in range(7):
-            date = start + datetime.timedelta(days=i)
-            posts = Post.objects.filter(
-                Q(family_id=request.user.family_id) &
-                Q(date=date)
-            )
-            try:
-                report = DayReport.objects.get(family_id=request.user.family_id, date=date)
+                count_data = createResponseData("count", i + 1, [report.emotion_0_count, report.emotion_1_count, report.emotion_2_count, report.emotion_3_count])
+                mean_data = createResponseData("mean", i + 1, [report.emotion_0_mean, report.emotion_1_mean, report.emotion_2_mean, report.emotion_3_mean])
                 deviation = [0, 0, 0, 0]
                 for post in posts:
                     deviation[0] += (post.emotion_0 - report.emotion_0_mean) ** 2
@@ -189,16 +149,21 @@ def get_week_variances(request, start):
                     deviation[2] += (post.emotion_2 - report.emotion_2_mean) ** 2
                     deviation[3] += (post.emotion_3 - report.emotion_3_mean) ** 2
                 variance = sum(deviation) / report.post_count / 4
-                data = createResponseData("variance", date, variance)
+                variance_data = createResponseData("variance", i + 1, variance)
             except DayReport.DoesNotExist:
-                data = createResponseData("variance", date, 0)
-            response_data.append(data)
+                count_data = createResponseData("count", i + 1, [0, 0, 0, 0])
+                mean_data = createResponseData("mean", i + 1, [0, 0, 0, 0])
+                variance_data = createResponseData("variance", i + 1, 0)
+            counts_data.append(count_data)
+            means_data.append(mean_data)
+            variances_data.append(variance_data)
+            response_data = {"counts": counts_data, "averages": means_data, "variances": variances_data}
         return Response(response_data, status=status.HTTP_200_OK)
     except Exception as e:
         response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(["GET"])
+@api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def create_dummy_data(request, date):
@@ -206,15 +171,17 @@ def create_dummy_data(request, date):
         _, days = calendar.monthrange(date.year, date.month)
         postSerializer = PostSerializer()
         reportSerializer = DayReportSerializer()
+        keywords = request.data["keyword"].split(" ")
         for day in range(1, days + 1):
             temp_date = f"{date.year}-{date.month}-{day}"
             report = reportSerializer.get_or_create(family=request.user.family_id, date=temp_date)
             for i in range(3):
                 random_numbers = np.random.dirichlet(np.ones(4), size=1)
+                random_keywords = np.random.choice(keywords, 3, replace=False)
                 data = {
                     "date": temp_date,
                     "emotion": random_numbers,
-                    "keyword": [("BTS", ), ("봉준호", ), ("손흥민", )],
+                    "keyword": [(random_keywords[0], ), (random_keywords[1], ), (random_keywords[2], )],
                     "content": "content",
                 }
                 post = postSerializer.createDummy(request.user.family_id, data)
