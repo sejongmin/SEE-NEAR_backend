@@ -4,7 +4,7 @@ GPT_ROLE = 'system'
 MAX_TOKENS = 100
 TEMPERATURE = 0.8
 TTS_MODEL = 'tts-1-hd'
-TTS_VOICE = 'alloy'
+TTS_VOICE = 'nova'
 TTS_SPEED = 1
 AUDIO_RESPONSE_FORMAT = 'wav'
 
