@@ -7,6 +7,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.http import FileResponse
 from .models import Post, DayReport
 from .serializers import PostSerializer, DayReportSerializer
 
@@ -207,6 +208,10 @@ def get_word_cloud(request, start):
                 continue
         createWordCloud(keywords)
         # 이미지 통신
+        f = open(WORDCLOUD_PATH, "rb")
+        image_response = FileResponse(f)
+        image_response.set_headers(f)
+        return image_response
     except Exception as e:
         response_data = {'error': str(e)}
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
