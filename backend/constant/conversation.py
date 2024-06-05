@@ -33,7 +33,7 @@ MAX_LENGTH = 100
 KEYWORD_MODEL = 'skt/kobert-base-v1'
 ENCODING = 'utf-8'
 
-# craete_wordcloud.py constant
+# create_wordcloud.py constant
 BACKGROUND_COLOR = "white"
 MAX_WORDS = 150
 WIDTH = 500
