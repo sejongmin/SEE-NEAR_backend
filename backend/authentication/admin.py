@@ -26,7 +26,7 @@ class RoutineInLine(admin.TabularInline):
     extra = 0
 
     fieldsets = [
-        (None, {"fields": ["name", "time", "is_active"]})
+        (None, {"fields": ["name", "time"]})
     ]
 
 class EventInLine(admin.TabularInline):
