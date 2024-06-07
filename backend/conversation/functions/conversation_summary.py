@@ -14,7 +14,7 @@ model = BartForConditionalGeneration.from_pretrained('digit82/kobart-summarizati
 # 오늘 하루도 이렇게 지나가니, 허리가 아프지만 그래도 감사한 마음이 든다.
 # """
 
-def conversation_summary(sents):
+def conversation_summary():
     with open(TEXT_PATH, "r", encoding=ENCODING) as f:
         sents = f.read()
     raw_input_ids = tokenizer.encode(sents)
