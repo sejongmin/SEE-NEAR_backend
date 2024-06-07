@@ -3,50 +3,50 @@ from transformers import PreTrainedTokenizerFast
 from transformers import BartForConditionalGeneration
 from constant.conversation import *
 
-tokenizer = PreTrainedTokenizerFast.from_pretrained('gogamza/kobart-summarization')
-model = BartForConditionalGeneration.from_pretrained('gogamza/kobart-summarization')
+tokenizer = PreTrainedTokenizerFast.from_pretrained('digit82/kobart-summarization')
+model = BartForConditionalGeneration.from_pretrained('digit82/kobart-summarization')
 
-# text = """
-# 오늘은 아침 일찍 일어나서 창밖을 바라봤다. 아름다운 해가 떠오르고 있었다.
-# 어제 꽃을 심은 정원을 살펴보니, 조금씩 자라고 있는 모습이 기쁘다.
-# 창가에 앉아 일기를 쓰는 것이 오랜만에 느껴진다. 마음이 차분해진다.
-# 지난 주에 방문한 도서관에서 빌린 책을 읽으며 시간을 보냈다.
-# 가까운 친구들이 방문해 커피를 마시며 오랫동안 얘기를 나누었다.
-# 밤에는 별들을 바라보며 하루를 돌아보았다. 작은 행복이 가득한 하루였다.
-# 내일은 손자와 손녀들이 놀러오는 날이다. 미리 음식을 준비해야겠다.
-# 마음이 머무는 곳이라면 내 가족들이 있는 곳이라고 생각한다.
-# 노래를 부르면서 정원을 거닐며 오늘의 감사한 순간들을 되새기기로 했다.
-# 내일의 일정을 생각하며 잠이 들었다. 오늘도 행복한 하루였다.
-
+# sents = """
+# 오늘도 허리가 아파서 아침에 일어나기가 참 힘들더라. 기지개를 켜고 겨우겨우 일어나서 차 한 잔 마셨지. 날씨는 참 좋은데, 허리가 계속 쑤시니까 움직이는 게 쉽지가 않네.
+# 점심에는 그냥 간단히 국밥을 끓였어. 서서 오래 있는 게 힘들어서 말이야. 그래도 손녀가 와서 도와주니 고맙더라고. 밥 먹으면서 손녀랑 이런저런 얘기를 나누었어.
+# 오후에는 허리 좀 펴보려고 동네 공원에 갔지. 친구들이랑 천천히 걷는데, 걸음이 느려져서 좀 답답하긴 하더라. 그래도 같이 얘기 나누면서 걷다 보니 한결 낫더군.
+# 저녁에는 허리가 더 아파서 누워서 TV 좀 보다가 책 몇 장 읽었어. 그런데 책도 오래 읽다 보니 허리가 더 아프네. 그냥 일찍 누웠어.
+# 오늘 하루도 이렇게 지나가니, 허리가 아프지만 그래도 감사한 마음이 든다.
 # """
 
-def conversation_summary():
+def conversation_summary(sents):
     with open(TEXT_PATH, "r", encoding=ENCODING) as f:
         sents = f.read()
     raw_input_ids = tokenizer.encode(sents)
     input_ids = [tokenizer.bos_token_id] + raw_input_ids + [tokenizer.eos_token_id]
-    input_ids = torch.tensor([input_ids])
+    summary_ids = model.generate(torch.tensor([input_ids]),  num_beams=4,  max_length=512,  eos_token_id=1)
 
-    summary_ids = model.generate(input_ids = input_ids,
-                                    bos_token_id = model.config.bos_token_id,
-                                    eos_token_id = model.config.eos_token_id,
-                                    max_length = 50,
-                                    length_penalty = 1.0,
-                                    min_length = 32,
-                                    num_beams = 10,
-                                )
+    text = tokenizer.decode(summary_ids.squeeze().tolist(), skip_special_tokens=True)
+    words = text.split()
+    seen_words = set()
+    result_words = []
 
-    flag = 0
-    list = []
+    for word in words:
+        if word not in seen_words:
+            seen_words.add(word)
+            result_words.append(word)
 
-    for i in range(1, len(summary_ids[0])) :
-        j = 0
-        for j in range(0, i) :
-            if tokenizer.decode(summary_ids[0][i]) == tokenizer.decode(summary_ids[0][j]) :
-                flag = 1
-                break
-        if flag == 0 :
-            list.append(tokenizer.decode(summary_ids[0][i]))
-        flag = 0
+    unique_text = " ".join(result_words)
 
-    return ''.join(list)
+    return unique_text
+
+    # flag = 0
+    # list = []
+
+    # for i in range(1, len(summary_ids[0])) :
+    #     j = 0
+    #     for j in range(0, i) :
+    #         if tokenizer.decode(summary_ids[0][i]) == tokenizer.decode(summary_ids[0][j]) :
+    #             flag = 1
+    #             break
+    #     if flag == 0 :
+    #         list.append(tokenizer.decode(summary_ids[0][i]))
+    #     flag = 0
+    # return ''.join(list)
+
+# print(conversation_summary(sents))
