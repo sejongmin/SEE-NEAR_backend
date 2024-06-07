@@ -110,7 +110,7 @@ def chatbot(request):
             open(TEXT_PATH, 'w').close()
 
         with open(TEXT_PATH, 'a', encoding=ENCODING) as f:
-            f.write(user_input + '\n')
+            f.write(user_input + '.\n')
         
         # Create prompt & Get response
         prompt = create_prompt(user_input, PROMPT_DEFAULT)
